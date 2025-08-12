@@ -1,0 +1,35 @@
+{
+  "timestamp": "2025-08-11 14:58:26",
+  "implementations": {
+    "HTML Demo": {
+      "type": "Interactive Browser-based",
+      "algorithms": [
+        "Q-Learning",
+        "Thompson Sampling",
+        "Hybrid"
+      ],
+      "features": [
+        "Real-time visualization",
+        "Interactive controls",
+        "Live metrics",
+        "Immediate feedback"
+      ],
+      "best_for": "Demonstration and visualization"
+    },
+    "Python Implementation": {
+      "type": "Command-line based",
+      "algorithms": [
+        "Q-Learning",
+        "Thompson Sampling",
+        "Hybrid"
+      ],
+      "features": [
+        "Batch processing",
+        "Statistical analysis",
+        "Data export",
+        "Reproducible experiments"
+      ],
+      "best_for": "Detailed analysis and research"
+    }
+  }
+}

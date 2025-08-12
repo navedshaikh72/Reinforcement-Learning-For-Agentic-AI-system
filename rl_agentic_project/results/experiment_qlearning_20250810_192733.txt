@@ -1,0 +1,18 @@
+Experiment Results - 20250810_192733
+==================================================
+agent_type: qlearning
+total_episodes: 54
+execution_time: 0.04738306999206543
+total_reward: -1263.5
+avg_reward: -23.39814814814815
+std_reward: 23.46853283883937
+max_reward: 34.0
+min_reward: -59
+final_10_avg_reward: -25.0
+final_success_rate: 0.195
+overall_success_rate: 0.21203703703703705
+convergence_episode: 50
+action_distribution: [309.0, 271.0, 239.0, 261.0]
+final_performance: 0.06000000000000009
+final_q_table_size: 122
+improvement: -6.8376068376068435

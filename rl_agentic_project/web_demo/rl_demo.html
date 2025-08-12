@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Tutorial Agent - RL System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 30px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        select, input[type="number"], input[type="range"] {
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            background: white;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .question-box {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            color: #333;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .answer-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .answer-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .answer-btn.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .answer-btn.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        #learningChart {
+            margin-top: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+
+        .log-container {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .highlight {
+            background: yellow;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Adaptive Tutorial Agent System</h1>
+        <p class="subtitle">Reinforcement Learning for Personalized Education</p>
+        
+        <div class="control-panel">
+            <div class="control-group">
+                <label for="learnerType">Learner Profile</label>
+                <select id="learnerType">
+                    <option value="fast">Fast Learner</option>
+                    <option value="average" selected>Average Learner</option>
+                    <option value="slow">Slow Learner</option>
+                    <option value="variable">Variable Performance</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="rlAlgorithm">RL Algorithm</label>
+                <select id="rlAlgorithm">
+                    <option value="qlearning" selected>Q-Learning</option>
+                    <option value="thompson">Thompson Sampling</option>
+                    <option value="hybrid">Hybrid (Q + Thompson)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="explorationRate">Exploration Rate: <span id="exploreValue">0.2</span></label>
+                <input type="range" id="explorationRate" min="0" max="1" step="0.1" value="0.2">
+            </div>
+            
+            <div class="control-group">
+                <label for="learningRate">Learning Rate: <span id="learnValue">0.1</span></label>
+                <input type="range" id="learningRate" min="0.01" max="0.5" step="0.01" value="0.1">
+            </div>
+            
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button id="startBtn" onclick="startLearning()">Start Learning Session</button>
+            </div>
+            
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button id="resetBtn" onclick="resetSystem()">Reset System</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="section">
+                <h2>📚 Learning Interface</h2>
+                <div class="question-box" id="questionBox">
+                    Click "Start Learning Session" to begin
+                </div>
+                <div class="answer-options" id="answerOptions"></div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">
+                        0%
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Current Difficulty</div>
+                        <div class="stat-value" id="currentDifficulty">-</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Questions Answered</div>
+                        <div class="stat-value" id="questionsAnswered">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Accuracy</div>
+                        <div class="stat-value" id="accuracy">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Streak</div>
+                        <div class="stat-value" id="streak">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📊 Learning Analytics</h2>
+                <canvas id="learningChart" width="400" height="200"></canvas>
+                
+                <h3 style="margin-top: 20px; font-size: 1.1em; color: #333;">Agent Decision Log</h3>
+                <div class="log-container" id="agentLog">
+                    <div class="log-entry">System initialized...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section" style="margin-top: 20px;">
+            <h2>🧠 RL Agent State</h2>
+            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-item">
+                    <div class="stat-label">Q-Table Size</div>
+                    <div class="stat-value" id="qTableSize">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Episodes</div>
+                    <div class="stat-value" id="episodes">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Reward</div>
+                    <div class="stat-value" id="totalReward">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Avg Reward</div>
+                    <div class="stat-value" id="avgReward">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // RL Agent Implementation
+        class AdaptiveTutorialAgent {
+            constructor(algorithm = 'qlearning') {
+                this.algorithm = algorithm;
+                this.qTable = {};
+                this.thompsonParams = {};
+                this.learningRate = 0.1;
+                this.discountFactor = 0.95;
+                this.explorationRate = 0.2;
+                this.episodes = 0;
+                this.totalReward = 0;
+                
+                // State representation
+                this.currentState = {
+                    difficulty: 'medium',
+                    performance: 'average',
+                    streak: 0,
+                    questionsAnswered: 0
+                };
+                
+                // Action space (difficulty levels)
+                this.actions = ['easy', 'medium', 'hard', 'expert'];
+                
+                // Initialize Q-table and Thompson parameters
+                this.initializeParameters();
+            }
+            
+            initializeParameters() {
+                // Initialize Q-table
+                const states = this.generateStates();
+                states.forEach(state => {
+                    const stateKey = this.stateToKey(state);
+                    this.qTable[stateKey] = {};
+                    this.thompsonParams[stateKey] = {};
+                    
+                    this.actions.forEach(action => {
+                        this.qTable[stateKey][action] = 0;
+                        this.thompsonParams[stateKey][action] = { alpha: 1, beta: 1 };
+                    });
+                });
+            }
+            
+            generateStates() {
+                const states = [];
+                const difficulties = ['easy', 'medium', 'hard', 'expert'];
+                const performances = ['poor', 'average', 'good', 'excellent'];
+                const streaks = [0, 1, 2, 3, 4, 5];
+                
+                difficulties.forEach(diff => {
+                    performances.forEach(perf => {
+                        streaks.forEach(streak => {
+                            states.push({
+                                difficulty: diff,
+                                performance: perf,
+                                streak: Math.min(streak, 5)
+                            });
+                        });
+                    });
+                });
+                
+                return states;
+            }
+            
+            stateToKey(state) {
+                return `${state.difficulty}_${state.performance}_${Math.min(state.streak, 5)}`;
+            }
+            
+            selectAction(state) {
+                const stateKey = this.stateToKey(state);
+                
+                if (this.algorithm === 'qlearning') {
+                    return this.qLearningAction(stateKey);
+                } else if (this.algorithm === 'thompson') {
+                    return this.thompsonSamplingAction(stateKey);
+                } else if (this.algorithm === 'hybrid') {
+                    // Hybrid: Use Thompson for exploration, Q-values for exploitation
+                    if (Math.random() < this.explorationRate) {
+                        return this.thompsonSamplingAction(stateKey);
+                    } else {
+                        return this.greedyAction(stateKey);
+                    }
+                }
+            }
+            
+            qLearningAction(stateKey) {
+                // Epsilon-greedy strategy
+                if (Math.random() < this.explorationRate) {
+                    return this.actions[Math.floor(Math.random() * this.actions.length)];
+                } else {
+                    return this.greedyAction(stateKey);
+                }
+            }
+            
+            greedyAction(stateKey) {
+                const qValues = this.qTable[stateKey];
+                let maxQ = -Infinity;
+                let bestAction = this.actions[0];
+                
+                for (const action in qValues) {
+                    if (qValues[action] > maxQ) {
+                        maxQ = qValues[action];
+                        bestAction = action;
+                    }
+                }
+                
+                return bestAction;
+            }
+            
+            thompsonSamplingAction(stateKey) {
+                const params = this.thompsonParams[stateKey];
+                let maxSample = -Infinity;
+                let bestAction = this.actions[0];
+                
+                this.actions.forEach(action => {
+                    const { alpha, beta } = params[action];
+                    // Sample from Beta distribution
+                    const sample = this.sampleBeta(alpha, beta);
+                    
+                    if (sample > maxSample) {
+                        maxSample = sample;
+                        bestAction = action;
+                    }
+                });
+                
+                return bestAction;
+            }
+            
+            sampleBeta(alpha, beta) {
+                // Simple approximation of Beta distribution sampling
+                let x = 0;
+                for (let i = 0; i < alpha; i++) {
+                    x += Math.random();
+                }
+                let y = 0;
+                for (let i = 0; i < beta; i++) {
+                    y += Math.random();
+                }
+                return x / (x + y);
+            }
+            
+            updateQLearning(state, action, reward, nextState) {
+                const stateKey = this.stateToKey(state);
+                const nextStateKey = this.stateToKey(nextState);
+                
+                // Q-learning update
+                const currentQ = this.qTable[stateKey][action];
+                const maxNextQ = Math.max(...Object.values(this.qTable[nextStateKey]));
+                
+                const newQ = currentQ + this.learningRate * 
+                    (reward + this.discountFactor * maxNextQ - currentQ);
+                
+                this.qTable[stateKey][action] = newQ;
+            }
+            
+            updateThompson(state, action, success) {
+                const stateKey = this.stateToKey(state);
+                const params = this.thompsonParams[stateKey][action];
+                
+                if (success) {
+                    params.alpha += 1;
+                } else {
+                    params.beta += 1;
+                }
+            }
+            
+            update(state, action, reward, nextState, success) {
+                if (this.algorithm === 'qlearning' || this.algorithm === 'hybrid') {
+                    this.updateQLearning(state, action, reward, nextState);
+                }
+                
+                if (this.algorithm === 'thompson' || this.algorithm === 'hybrid') {
+                    this.updateThompson(state, action, success);
+                }
+                
+                this.episodes++;
+                this.totalReward += reward;
+            }
+            
+            calculateReward(correct, difficulty, timeSpent) {
+                let reward = 0;
+                
+                const difficultyMultiplier = {
+                    'easy': 0.5,
+                    'medium': 1.0,
+                    'hard': 1.5,
+                    'expert': 2.0
+                };
+                
+                if (correct) {
+                    reward = 10 * difficultyMultiplier[difficulty];
+                    // Bonus for quick answers
+                    if (timeSpent < 5) reward *= 1.2;
+                } else {
+                    reward = -5 * difficultyMultiplier[difficulty];
+                }
+                
+                return reward;
+            }
+        }
+        
+        // Question Generator
+        class QuestionGenerator {
+            constructor() {
+                this.topics = {
+                    easy: [
+                        { q: "What is 2 + 2?", a: ["4", "3", "5", "6"], correct: 0 },
+                        { q: "What color is the sky?", a: ["Blue", "Red", "Green", "Yellow"], correct: 0 },
+                        { q: "How many days in a week?", a: ["7", "5", "6", "8"], correct: 0 },
+                        { q: "What is 5 - 3?", a: ["2", "3", "1", "4"], correct: 0 },
+                        { q: "Which is larger: 10 or 8?", a: ["10", "8", "Same", "Neither"], correct: 0 }
+                    ],
+                    medium: [
+                        { q: "What is 15 × 4?", a: ["60", "45", "55", "65"], correct: 0 },
+                        { q: "What is the capital of France?", a: ["Paris", "London", "Berlin", "Madrid"], correct: 0 },
+                        { q: "What is 144 ÷ 12?", a: ["12", "10", "14", "11"], correct: 0 },
+                        { q: "Which planet is closest to the Sun?", a: ["Mercury", "Venus", "Mars", "Earth"], correct: 0 },
+                        { q: "What is 25% of 80?", a: ["20", "25", "15", "30"], correct: 0 }
+                    ],
+                    hard: [
+                        { q: "What is the derivative of x²?", a: ["2x", "x", "x²", "2x²"], correct: 0 },
+                        { q: "What is the square root of 169?", a: ["13", "14", "12", "15"], correct: 0 },
+                        { q: "Which element has atomic number 79?", a: ["Gold", "Silver", "Platinum", "Copper"], correct: 0 },
+                        { q: "What is 2³ + 3²?", a: ["17", "15", "13", "19"], correct: 0 },
+                        { q: "In binary, what is 1010?", a: ["10", "8", "12", "14"], correct: 0 }
+                    ],
+                    expert: [
+                        { q: "What is ∫ sin(x) dx?", a: ["-cos(x) + C", "cos(x) + C", "sin(x) + C", "-sin(x) + C"], correct: 0 },
+                        { q: "What is the time complexity of quicksort (average)?", a: ["O(n log n)", "O(n²)", "O(n)", "O(log n)"], correct: 0 },
+                        { q: "What is Euler's number (e) approximately?", a: ["2.718", "3.141", "1.618", "2.236"], correct: 0 },
+                        { q: "What is the Fibonacci number F(10)?", a: ["55", "34", "89", "21"], correct: 0 },
+                        { q: "What is log₂(256)?", a: ["8", "7", "9", "6"], correct: 0 }
+                    ]
+                };
+            }
+            
+            getQuestion(difficulty) {
+                const questions = this.topics[difficulty];
+                const question = questions[Math.floor(Math.random() * questions.length)];
+                
+                // Shuffle answers while keeping track of correct index
+                const shuffled = this.shuffleAnswers(question);
+                return shuffled;
+            }
+            
+            shuffleAnswers(question) {
+                const indices = [0, 1, 2, 3];
+                const shuffled = [...question.a];
+                let correctIndex = question.correct;
+                
+                for (let i = indices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    
+                    if (i === question.correct) correctIndex = j;
+                    else if (j === question.correct) correctIndex = i;
+                }
+                
+                return {
+                    q: question.q,
+                    a: shuffled,
+                    correct: correctIndex
+                };
+            }
+        }
+        
+        // Simulated Learner
+        class SimulatedLearner {
+            constructor(type = 'average') {
+                this.type = type;
+                this.knowledge = 0.5;
+                this.fatigue = 0;
+                
+                // Learner characteristics
+                this.profiles = {
+                    fast: { baseProb: 0.8, learnRate: 0.15, fatigueRate: 0.01 },
+                    average: { baseProb: 0.6, learnRate: 0.08, fatigueRate: 0.02 },
+                    slow: { baseProb: 0.4, learnRate: 0.04, fatigueRate: 0.03 },
+                    variable: { baseProb: 0.5, learnRate: 0.1, fatigueRate: 0.025 }
+                };
+                
+                this.profile = this.profiles[type];
+            }
+            
+            answerQuestion(difficulty) {
+                const difficultyFactors = {
+                    easy: 1.2,
+                    medium: 1.0,
+                    hard: 0.8,
+                    expert: 0.6
+                };
+                
+                let probability = this.profile.baseProb * this.knowledge * 
+                    difficultyFactors[difficulty] * (1 - this.fatigue);
+                
+                // Variable learner has random performance spikes/drops
+                if (this.type === 'variable') {
+                    probability *= (0.5 + Math.random());
+                }
+                
+                const correct = Math.random() < probability;
+                
+                // Update learner state
+                if (correct) {
+                    this.knowledge = Math.min(1, this.knowledge + this.profile.learnRate);
+                } else {
+                    this.knowledge = Math.max(0.2, this.knowledge - this.profile.learnRate * 0.5);
+                }
+                
+                this.fatigue = Math.min(0.5, this.fatigue + this.profile.fatigueRate);
+                
+                return correct;
+            }
+            
+            reset() {
+                this.knowledge = 0.5;
+                this.fatigue = 0;
+            }
+        }
+        
+        // Main Application
+        let agent = new AdaptiveTutorialAgent('qlearning');
+        let questionGen = new QuestionGenerator();
+        let learner = new SimulatedLearner('average');
+        let sessionActive = false;
+        let currentQuestion = null;
+        let startTime = 0;
+        
+        // Statistics
+        let stats = {
+            questionsAnswered: 0,
+            correctAnswers: 0,
+            streak: 0,
+            maxStreak: 0,
+            performanceHistory: [],
+            difficultyHistory: [],
+            rewardHistory: []
+        };
+        
+        // Chart setup
+        const canvas = document.getElementById('learningChart');
+        const ctx = canvas.getContext('2d');
+        let chartData = {
+            performance: [],
+            difficulty: [],
+            reward: []
+        };
+        
+        // Event listeners
+        document.getElementById('explorationRate').addEventListener('input', (e) => {
+            agent.explorationRate = parseFloat(e.target.value);
+            document.getElementById('exploreValue').textContent = e.target.value;
+        });
+        
+        document.getElementById('learningRate').addEventListener('input', (e) => {
+            agent.learningRate = parseFloat(e.target.value);
+            document.getElementById('learnValue').textContent = e.target.value;
+        });
+        
+        document.getElementById('learnerType').addEventListener('change', (e) => {
+            learner = new SimulatedLearner(e.target.value);
+            logMessage(`Learner profile changed to: ${e.target.value}`);
+        });
+        
+        document.getElementById('rlAlgorithm').addEventListener('change', (e) => {
+            agent = new AdaptiveTutorialAgent(e.target.value);
+            agent.explorationRate = parseFloat(document.getElementById('explorationRate').value);
+            agent.learningRate = parseFloat(document.getElementById('learningRate').value);
+            logMessage(`RL algorithm changed to: ${e.target.value}`);
+        });
+        
+        function startLearning() {
+            sessionActive = true;
+            document.getElementById('startBtn').disabled = true;
+            nextQuestion();
+        }
+        
+        function nextQuestion() {
+            if (!sessionActive) return;
+            
+            // Get agent's action (difficulty selection)
+            const state = {
+                difficulty: agent.currentState.difficulty,
+                performance: calculatePerformanceLevel(),
+                streak: stats.streak
+            };
+            
+            const selectedDifficulty = agent.selectAction(state);
+            agent.currentState.difficulty = selectedDifficulty;
+            
+            // Generate question
+            currentQuestion = questionGen.getQuestion(selectedDifficulty);
+            startTime = Date.now();
+            
+            // Display question
+            displayQuestion(currentQuestion, selectedDifficulty);
+            
+            // Log decision
+            logMessage(`Agent selected ${selectedDifficulty} difficulty (State: ${agent.stateToKey(state)})`);
+            
+            // Update UI
+            updateStats();
+        }
+        
+        function displayQuestion(question, difficulty) {
+            document.getElementById('questionBox').textContent = question.q;
+            document.getElementById('currentDifficulty').textContent = 
+                difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+            
+            const optionsContainer = document.getElementById('answerOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.a.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.onclick = () => handleAnswer(index);
+                optionsContainer.appendChild(btn);
+            });
+        }
+        
+        function handleAnswer(selectedIndex) {
+            if (!currentQuestion) return;
+            
+            const timeSpent = (Date.now() - startTime) / 1000;
+            const correct = selectedIndex === currentQuestion.correct;
+            
+            // Simulate learner's actual response
+            const learnerCorrect = learner.answerQuestion(agent.currentState.difficulty);
+            
+            // Visual feedback
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === currentQuestion.correct) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedIndex && !learnerCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            // Update statistics
+            stats.questionsAnswered++;
+            if (learnerCorrect) {
+                stats.correctAnswers++;
+                stats.streak++;
+                stats.maxStreak = Math.max(stats.maxStreak, stats.streak);
+            } else {
+                stats.streak = 0;
+            }
+            
+            // Calculate reward
+            const reward = agent.calculateReward(learnerCorrect, agent.currentState.difficulty, timeSpent);
+            
+            // Update agent
+            const oldState = { ...agent.currentState };
+            const newState = {
+                difficulty: agent.currentState.difficulty,
+                performance: calculatePerformanceLevel(),
+                streak: stats.streak
+            };
+            
+            agent.update(oldState, agent.currentState.difficulty, reward, newState, learnerCorrect);
+            agent.currentState = newState;
+            
+            // Record history
+            stats.performanceHistory.push(stats.correctAnswers / stats.questionsAnswered);
+            stats.difficultyHistory.push(agent.actions.indexOf(agent.currentState.difficulty));
+            stats.rewardHistory.push(reward);
+            
+            // Update chart
+            updateChart();
+            
+            // Log result
+            logMessage(`Answer: ${learnerCorrect ? 'Correct' : 'Incorrect'} | Reward: ${reward.toFixed(2)}`);
+            
+            // Continue to next question
+            setTimeout(() => {
+                if (stats.questionsAnswered < 50) {
+                    nextQuestion();
+                } else {
+                    endSession();
+                }
+            }, 1500);
+            
+            updateStats();
+        }
+        
+        function calculatePerformanceLevel() {
+            const accuracy = stats.questionsAnswered > 0 ? 
+                stats.correctAnswers / stats.questionsAnswered : 0.5;
+            
+            if (accuracy >= 0.9) return 'excellent';
+            if (accuracy >= 0.7) return 'good';
+            if (accuracy >= 0.5) return 'average';
+            return 'poor';
+        }
+        
+        function updateStats() {
+            document.getElementById('questionsAnswered').textContent = stats.questionsAnswered;
+            document.getElementById('accuracy').textContent = 
+                stats.questionsAnswered > 0 ? 
+                `${(stats.correctAnswers / stats.questionsAnswered * 100).toFixed(1)}%` : '0%';
+            document.getElementById('streak').textContent = stats.streak;
+            
+            // Update progress bar
+            const progress = (stats.questionsAnswered / 50) * 100;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${Math.round(progress)}%`;
+            
+            // Update RL stats
+            document.getElementById('qTableSize').textContent = 
+                Object.keys(agent.qTable).length * agent.actions.length;
+            document.getElementById('episodes').textContent = agent.episodes;
+            document.getElementById('totalReward').textContent = agent.totalReward.toFixed(1);
+            document.getElementById('avgReward').textContent = 
+                agent.episodes > 0 ? (agent.totalReward / agent.episodes).toFixed(2) : '0';
+        }
+        
+        function updateChart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const padding = 40;
+            const width = canvas.width - 2 * padding;
+            const height = canvas.height - 2 * padding;
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.stroke();
+            
+            // Draw performance line
+            if (stats.performanceHistory.length > 1) {
+                ctx.strokeStyle = '#28a745';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                stats.performanceHistory.forEach((perf, i) => {
+                    const x = padding + (i / (stats.performanceHistory.length - 1)) * width;
+                    const y = canvas.height - padding - perf * height;
+                    
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+            }
+            
+            // Draw difficulty line
+            if (stats.difficultyHistory.length > 1) {
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                stats.difficultyHistory.forEach((diff, i) => {
+                    const x = padding + (i / (stats.difficultyHistory.length - 1)) * width;
+                    const y = canvas.height - padding - (diff / 3) * height;
+                    
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+            }
+            
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('Performance', padding + 5, padding - 10);
+            ctx.fillStyle = '#28a745';
+            ctx.fillText('● Accuracy', canvas.width - 150, padding - 10);
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('● Difficulty', canvas.width - 70, padding - 10);
+        }
+        
+        function logMessage(message) {
+            const logContainer = document.getElementById('agentLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.insertBefore(entry, logContainer.firstChild);
+            
+            // Keep only last 10 entries
+            while (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+        
+        function endSession() {
+            sessionActive = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('questionBox').textContent = 
+                `Session Complete! Final Accuracy: ${(stats.correctAnswers / stats.questionsAnswered * 100).toFixed(1)}%`;
+            document.getElementById('answerOptions').innerHTML = '';
+            
+            logMessage(`Session ended. Total reward: ${agent.totalReward.toFixed(2)}`);
+        }
+        
+        function resetSystem() {
+            sessionActive = false;
+            agent = new AdaptiveTutorialAgent(document.getElementById('rlAlgorithm').value);
+            learner = new SimulatedLearner(document.getElementById('learnerType').value);
+            
+            stats = {
+                questionsAnswered: 0,
+                correctAnswers: 0,
+                streak: 0,
+                maxStreak: 0,
+                performanceHistory: [],
+                difficultyHistory: [],
+                rewardHistory: []
+            };
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('questionBox').textContent = 'Click "Start Learning Session" to begin';
+            document.getElementById('answerOptions').innerHTML = '';
+            
+            updateStats();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            logMessage('System reset complete');
+        }
+        
+        // Initialize
+        updateStats();
+    </script>
+</body>
+</html>

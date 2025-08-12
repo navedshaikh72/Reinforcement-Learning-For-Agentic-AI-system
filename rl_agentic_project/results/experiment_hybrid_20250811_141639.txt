@@ -1,0 +1,18 @@
+Experiment Results - 20250811_141639
+==================================================
+agent_type: hybrid
+total_episodes: 200
+execution_time: 0.22505903244018555
+total_reward: 172.0
+avg_reward: 0.86
+std_reward: 42.77856238818691
+max_reward: 71
+min_reward: -65.5
+final_10_avg_reward: 27.45
+final_success_rate: 0.755
+overall_success_rate: 0.5265
+convergence_episode: 67
+action_distribution: [2664.0, 476.0, 461.0, 399.0]
+final_performance: 1.0
+final_q_table_size: 127
+improvement: 247.4683544303797
